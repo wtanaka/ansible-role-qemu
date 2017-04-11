@@ -1,0 +1,29 @@
+---
+- name: check for short-circuit
+  command: command -v qemu
+  register: installed
+  ignore_errors: True
+  changed_when: False
+
+- name: set should_run fact
+  set_fact:
+    should_run: "{{installed|failed or not qemu_should_shortcircuit}}"
+
+- include: compat.yml
+
+- include: include_vars.yml
+
+# Install EPEL
+- include: epel.yml
+  when: ansible_distribution == 'CentOS'
+
+- include: Ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+
+- include: Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include: RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: install_package_names.yml
